@@ -32,6 +32,7 @@ int makelist(char *s, const char *delimiters, char** list, int MAX_LIST){
      if(numtokens == (MAX_LIST-1)) return -1;
      numtokens++;
   }
+
   return numtokens;
 }
 
@@ -44,15 +45,21 @@ int main(int argc, char**argv){
 	fgets(cmdline, BUFSIZ, stdin);
 	cmdline[ strlen(cmdline) -1] ='\0';
   
+	makelist(cmdline, " \t", cmdvector, MAX_CMD_ARG);
+	/* exit input -> shell process exit. */
+	if(!strcmp(cmdvector[0], "exit")) exit(0);
+
 	switch(pid=fork()){
 	case 0:
-		makelist(cmdline, " \t", cmdvector, MAX_CMD_ARG);
+		if(!strcmp(cmdvector[0], "cd") ) exit(0);
 		execvp(cmdvector[0], cmdvector);
 		fatal("main()");
 	case -1:
   		fatal("main()");
 	default:
 		wait(NULL);
+		/* cd input -> parent process chage directory. */
+		if(!strcmp(cmdvector[0], "cd") && chdir(cmdvector[1]) == -1 ) perror("main()");
 	}
   }
   return 0;
