@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>	/* zombie process management */
 #define MAX_CMD_ARG 10
 
 const char *prompt = "myshell> ";
@@ -51,6 +52,9 @@ int main(int argc, char**argv){
 		fputs(prompt, stdout);
 		fgets(cmdline, BUFSIZ, stdin);
 		cmdline[ strlen(cmdline) -1] ='\0';
+
+		/* zombie process management */
+		waitpid(-1, NULL, WNOHANG);
 
 		makelist(cmdline, " \t", cmdvector, MAX_CMD_ARG);
 		/* exit input -> shell process exit. */
